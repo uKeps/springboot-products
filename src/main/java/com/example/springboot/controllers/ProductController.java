@@ -50,4 +50,14 @@ public class ProductController {
                 })
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found."));
     }
+
+    @DeleteMapping("/products/{id}")
+    public ResponseEntity<Object> deleteProduct(@PathVariable(value="id") UUID id) {
+        return productRepository.findById(id)
+                .map(product -> {
+                    productRepository.delete(product);
+                    return ResponseEntity.status(HttpStatus.OK).body((Object) "Product deleted successfully.");
+                })
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found."));
+    }
 }
