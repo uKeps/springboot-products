@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 @RestController
 public class ProductController {
 
@@ -29,15 +32,22 @@ public class ProductController {
     }
 
     @GetMapping("/products")
-    public ResponseEntity<List<ProductModel>> getAllProducts() {
-        return ResponseEntity.status(HttpStatus.OK).body(productRepository.findAll());
+    public ResponseEntity<List<ProductModel>> getAllProducts(){
+        List<ProductModel> productsList = productRepository.findAll();
+        productsList.forEach(product ->
+                product.add(linkTo(methodOn(ProductController.class).getOneProduct(product.getIdProduct())).withSelfRel())
+        );
+        return ResponseEntity.status(HttpStatus.OK).body(productsList);
     }
 
     @GetMapping("/products/{id}")
     public ResponseEntity<Object> getOneProduct(@PathVariable(value="id") UUID id){
-        Optional<ProductModel> productO = productRepository.findById(id);
-        return productO.<ResponseEntity<Object>>map(productModel -> ResponseEntity.status(HttpStatus.OK).body(productModel))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found."));
+        return productRepository.findById(id)
+                .map(product -> {
+                    product.add(linkTo(methodOn(ProductController.class).getAllProducts()).withRel("Products List"));
+                    return ResponseEntity.status(HttpStatus.OK).body((Object) product);
+                })
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found."));
     }
 
     @PutMapping("/products/{id}")
