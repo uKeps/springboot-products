@@ -74,7 +74,7 @@ spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation=true
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/springboot-products.git
+git clone https://github.com/uKeps/springboot-products.git
 
 # Navigate to the project folder
 cd springboot-products
